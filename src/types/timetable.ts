@@ -9,6 +9,8 @@ export interface Teacher {
   id: string;
   name: string;
   color: string;
+  /** Weekday indexes on which this teacher may be scheduled. */
+  availableDays: number[];
   subjects: TeachingSubject[];
 }
 

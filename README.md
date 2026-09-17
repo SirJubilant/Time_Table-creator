@@ -24,10 +24,11 @@ Open the local URL shown by Vite, normally `http://localhost:3000`.
 2. Set the school days and total periods per week.
 3. Enter break period numbers, separated by commas. Leave blank for no breaks.
 4. Add each teacher and their subjects.
-5. For each subject, enter the exact class names taught by that teacher.
-6. Select **Generate timetable**.
+5. Select the weekdays on which each teacher can teach.
+6. For each subject, enter the exact class names taught by that teacher.
+7. Select **Generate timetable**.
 
-The generator spreads subject periods across the week while avoiding occupied class slots, breaks, and teacher conflicts.
+The generator spreads subject periods across the selected weekdays while avoiding occupied class slots, breaks, and teacher conflicts. Dragging a lesson to a weekday outside its teacher's selection is also rejected.
 
 ## Teacher conflicts
 

@@ -13,6 +13,7 @@ const emptyState: TimetableState = {
 };
 
 const keyFor = (dayIndex: number, periodIndex: number, className: string) => `${dayIndex}:${periodIndex}:${className}`;
+const teacherCanTeachOn = (teacher: Teacher, dayIndex: number, daysCount: number) => (teacher.availableDays ?? Array.from({ length: daysCount }, (_, index) => index)).includes(dayIndex);
 const periodDurationsFor = (config: TimetableConfig) => Array.from(
   { length: config.periodsPerDay },
   (_, index) => config.periodDurations?.[index] ?? config.lessonDuration,
@@ -28,16 +29,16 @@ export function useTimetable() {
 
   useEffect(() => localStorage.setItem(STORAGE_KEY, JSON.stringify(state)), [state]);
 
-  const configure = (config: TimetableConfig, teacherEntries: Array<{ name: string; subjects: Array<{ name: string; periodsPerWeek: number; classes: string[] }> }>) => {
+  const configure = (config: TimetableConfig, teacherEntries: Array<{ name: string; availableDays: number[]; subjects: Array<{ name: string; periodsPerWeek: number; classes: string[] }> }>) => {
     const teachers: Teacher[] = teacherEntries.map((entry, index) => ({
-      id: generateId(), name: entry.name.trim(), color: getTeacherColor(index),
+      id: generateId(), name: entry.name.trim(), color: getTeacherColor(index), availableDays: entry.availableDays,
       subjects: entry.subjects.map((subject) => ({ id: generateId(), name: subject.name.trim(), periodsPerWeek: subject.periodsPerWeek, classes: subject.classes })),
     }));
     const data: Record<string, Lesson> = {};
     let unplaced = 0;
     teachers.forEach((teacher) => teacher.subjects.forEach((subject) => subject.classes.forEach((className) => {
       for (let slot = 0; slot < subject.periodsPerWeek; slot += 1) {
-        const candidates = Array.from({ length: config.daysCount }, (_, dayIndex) => Array.from({ length: config.periodsPerDay }, (_, index) => ({ dayIndex, periodIndex: index + 1 }))).flat().filter(({ dayIndex, periodIndex }) => !config.breakPeriods.includes(periodIndex) && !data[keyFor(dayIndex, periodIndex, className)] && !Object.values(data).some((lesson) => {
+        const candidates = Array.from({ length: config.daysCount }, (_, dayIndex) => Array.from({ length: config.periodsPerDay }, (_, index) => ({ dayIndex, periodIndex: index + 1 }))).flat().filter(({ dayIndex, periodIndex }) => teacherCanTeachOn(teacher, dayIndex, config.daysCount) && !config.breakPeriods.includes(periodIndex) && !data[keyFor(dayIndex, periodIndex, className)] && !Object.values(data).some((lesson) => {
           const existingTeacher = teachers.find((item) => item.id === lesson.teacherId);
           return existingTeacher && teachersShareName(existingTeacher.name, teacher.name) && lesson.dayIndex === dayIndex && lesson.periodIndex === periodIndex;
         }));
@@ -69,6 +70,10 @@ export function useTimetable() {
         return previous;
       }
       const lessonTeacher = previous.teachers.find((teacher) => teacher.id === lesson.teacherId);
+      if (lessonTeacher && !teacherCanTeachOn(lessonTeacher, dayIndex, previous.config.daysCount)) {
+        toast.error(`${lessonTeacher.name} is not available on this day.`);
+        return previous;
+      }
       const conflict = Object.entries(previous.data).some(([key, value]) => {
         const existingTeacher = previous.teachers.find((teacher) => teacher.id === value.teacherId);
         return key !== fromKey && key !== destinationKey && !!lessonTeacher && !!existingTeacher && teachersShareName(existingTeacher.name, lessonTeacher.name) && value.dayIndex === dayIndex && value.periodIndex === periodIndex;
@@ -77,6 +82,10 @@ export function useTimetable() {
       const nextData = { ...previous.data };
       const destination = nextData[destinationKey];
       const destinationTeacher = destination && previous.teachers.find((teacher) => teacher.id === destination.teacherId);
+      if (destination && destinationTeacher && !teacherCanTeachOn(destinationTeacher, lesson.dayIndex, previous.config.daysCount)) {
+        toast.error(`${destinationTeacher.name} would be unavailable after this swap.`);
+        return previous;
+      }
       const swapConflict = destination && destinationTeacher && Object.entries(previous.data).some(([key, value]) => {
         const existingTeacher = previous.teachers.find((teacher) => teacher.id === value.teacherId);
         return key !== fromKey && key !== destinationKey && !!existingTeacher && teachersShareName(existingTeacher.name, destinationTeacher.name) && value.dayIndex === lesson.dayIndex && value.periodIndex === lesson.periodIndex;
@@ -93,6 +102,7 @@ export function useTimetable() {
     const teacher = state.teachers.find((item) => item.id === teacherId);
     const subject = teacher?.subjects.find((item) => item.id === subjectId);
     if (!teacher || !subject || state.config.breakPeriods.includes(periodIndex)) return;
+    if (!teacherCanTeachOn(teacher, dayIndex, state.config.daysCount)) { toast.error(`${teacher.name} is not available on this day.`); return; }
     const key = keyFor(dayIndex, periodIndex, className);
     const teacherClash = Object.entries(state.data).some(([existingKey, lesson]) => {
       const existingTeacher = state.teachers.find((item) => item.id === lesson.teacherId);
