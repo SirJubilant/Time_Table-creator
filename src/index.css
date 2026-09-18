@@ -189,3 +189,61 @@
     letter-spacing: var(--tracking-normal);
   }
 }
+
+@media print {
+  @page {
+    size: A3 landscape;
+    margin: 10mm;
+  }
+
+  body {
+    background: white !important;
+  }
+
+  body .print-controls {
+    display: none !important;
+  }
+
+  body .timetable-app > section.print-controls {
+    display: none !important;
+  }
+
+  .timetable-app::before {
+    content: "Weekly Timetable";
+    display: block;
+    margin-bottom: 8mm;
+    color: #0f172a;
+    font-size: 18pt;
+    font-weight: 800;
+  }
+
+  .timetable-app,
+  .timetable-app > section {
+    display: block !important;
+    max-width: none !important;
+    overflow: visible !important;
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .timetable-scroll {
+    overflow: visible !important;
+    border: 1px solid #cbd5e1 !important;
+  }
+
+  .timetable-print {
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+
+  .timetable-day {
+    break-inside: auto;
+  }
+
+  input {
+    border: 0 !important;
+    background: transparent !important;
+    padding: 0 !important;
+    text-align: center;
+  }
+}

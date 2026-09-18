@@ -8,14 +8,16 @@ import { toast } from "sonner";
 
 interface SubjectDraft { name: string; periodsPerWeek: number; classes: string; }
 interface TeacherDraft { name: string; availableDays: number[]; subjects: SubjectDraft[]; }
-interface Props { onComplete: (config: TimetableConfig, teachers: Array<{ name: string; availableDays: number[]; subjects: Array<{ name: string; periodsPerWeek: number; classes: string[] }> }>) => void; }
+export type TeacherEntry = { name: string; availableDays: number[]; subjects: Array<{ name: string; periodsPerWeek: number; classes: string[] }> };
+interface Props { onComplete: (config: TimetableConfig, teachers: TeacherEntry[]) => void; initialConfig?: TimetableConfig; initialTeachers?: TeacherEntry[]; }
 const subjectDraft = (): SubjectDraft => ({ name: "", periodsPerWeek: 1, classes: "" });
 const teacherDraft = (): TeacherDraft => ({ name: "", availableDays: [0, 1, 2, 3, 4], subjects: [subjectDraft()] });
 const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
-export function SetupWizard({ onComplete }: Props) {
-  const [classes, setClasses] = useState("JSS 1A, JSS 1B, JSS 2A"); const [teachers, setTeachers] = useState<TeacherDraft[]>([teacherDraft()]);
-  const [daysCount, setDaysCount] = useState(5); const [periodsPerWeek, setPeriodsPerWeek] = useState(40); const [breakPeriodsText, setBreakPeriodsText] = useState("4"); const [lessonDuration, setLessonDuration] = useState(45);
+export function SetupWizard({ onComplete, initialConfig, initialTeachers }: Props) {
+  const [classes, setClasses] = useState(() => initialConfig?.classes.join(", ") ?? "JSS1A, JSS1B, JSS1C, JSS1D, JSS2A, JSS2B, JSS2C, JSS2D, JSS3A, JSS3B, JSS3C, JSS3D, SS1A, SS1B, SS1C, SS1D, SS2A, SS2B, SS2C, SS2D, SS3A, SS3B, SS3C, SS3D");
+  const [teachers, setTeachers] = useState<TeacherDraft[]>(() => initialTeachers?.map((teacher) => ({ name: teacher.name, availableDays: teacher.availableDays, subjects: teacher.subjects.map((subject) => ({ name: subject.name, periodsPerWeek: subject.periodsPerWeek, classes: subject.classes.join(", ") })) })) ?? [teacherDraft()]);
+  const [daysCount, setDaysCount] = useState(initialConfig?.daysCount ?? 5); const [periodsPerWeek, setPeriodsPerWeek] = useState(initialConfig?.periodsPerWeek ?? 40); const [breakPeriodsText, setBreakPeriodsText] = useState(initialConfig?.breakPeriods.join(", ") ?? "4"); const [lessonDuration, setLessonDuration] = useState(initialConfig?.lessonDuration ?? 45);
   const updateTeacher = (index: number, name: string) => setTeachers((items) => items.map((item, i) => i === index ? { ...item, name } : item));
   const toggleTeacherDay = (teacherIndex: number, dayIndex: number) => setTeachers((items) => items.map((teacher, i) => {
     if (i !== teacherIndex) return teacher;
