@@ -15,7 +15,7 @@ const teacherDraft = (): TeacherDraft => ({ name: "", availableDays: [0, 1, 2, 3
 const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
 export function SetupWizard({ onComplete, initialConfig, initialTeachers }: Props) {
-  const [classes, setClasses] = useState(() => initialConfig?.classes.join(", ") ?? "JSS1A, JSS1B, JSS1C, JSS1D, JSS2A, JSS2B, JSS2C, JSS2D, JSS3A, JSS3B, JSS3C, JSS3D, SS1A, SS1B, SS1C, SS1D, SS2A, SS2B, SS2C, SS2D, SS3A, SS3B, SS3C, SS3D");
+  const [classes, setClasses] = useState(() => initialConfig?.classes.join(", ") ?? "JSS1A, JSS1B, JSS1C, JSS1D, JSS2A, JSS2B, JSS2C, JSS2D, JSS3A");
   const [teachers, setTeachers] = useState<TeacherDraft[]>(() => initialTeachers?.map((teacher) => ({ name: teacher.name, availableDays: teacher.availableDays, subjects: teacher.subjects.map((subject) => ({ name: subject.name, periodsPerWeek: subject.periodsPerWeek, classes: subject.classes.join(", ") })) })) ?? [teacherDraft()]);
   const [daysCount, setDaysCount] = useState(initialConfig?.daysCount ?? 5); const [periodsPerWeek, setPeriodsPerWeek] = useState(initialConfig?.periodsPerWeek ?? 40); const [breakPeriodsText, setBreakPeriodsText] = useState(initialConfig?.breakPeriods.join(", ") ?? "4"); const [lessonDuration, setLessonDuration] = useState(initialConfig?.lessonDuration ?? 45);
   const updateTeacher = (index: number, name: string) => setTeachers((items) => items.map((item, i) => i === index ? { ...item, name } : item));

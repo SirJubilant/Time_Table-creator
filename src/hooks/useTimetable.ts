@@ -82,7 +82,7 @@ export function useTimetable() {
       const nextData = { ...previous.data };
       const destination = nextData[destinationKey];
       const destinationTeacher = destination && previous.teachers.find((teacher) => teacher.id === destination.teacherId);
-      if (destination && destinationTeacher && !teacherCanTeachOn(destinationTeacher, lesson.dayIndex, previous.config.daysCount)) {
+      if (destination && destinationTeacher && !teacherCanTeachOn(destinationTeacher, dayIndex, previous.config.daysCount)) {
         toast.error(`${destinationTeacher.name} would be unavailable after this swap.`);
         return previous;
       }
