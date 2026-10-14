@@ -3,6 +3,7 @@ export interface TeachingSubject {
   name: string;
   periodsPerWeek: number;
   classes: string[];
+  doublePeriodClass?: string;
 }
 
 export interface Teacher {

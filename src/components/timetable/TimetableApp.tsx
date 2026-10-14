@@ -11,7 +11,7 @@ export function TimetableApp() {
   const editTeachers: TeacherEntry[] = timetable.state.teachers.map((teacher) => ({
     name: teacher.name,
     availableDays: teacher.availableDays,
-    subjects: teacher.subjects.map((subject) => ({ name: subject.name, periodsPerWeek: subject.periodsPerWeek, classes: subject.classes })),
+    subjects: teacher.subjects.map((subject) => ({ name: subject.name, periodsPerWeek: subject.periodsPerWeek, classes: subject.classes, doublePeriodClass: subject.doublePeriodClass })),
   }));
   return <main className="min-h-screen bg-slate-50 pb-16">
     <div className="mx-auto max-w-[1500px] px-4 py-8 md:px-8">
